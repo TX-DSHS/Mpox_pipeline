@@ -1,16 +1,26 @@
 # Run Monkey Pox pipeline
 # Author: Jie.Lu@dshs.texas.gov
-version="1.0-11/14/2022"
+version="v1.1-05/02/2024"
+# set the base directory
+aws_bucket="s3://804609861260-covid-19"
 
-basedir="/home/dnalab"
-mkdir -p $basedir/results/$1
-echo "Running Monkey Pox version %s" $version > $basedir/results/$1/run_mpx.log
+# Read the aws bucket name from file aws_bucket.txt
+#aws_bucket=$(cat aws_bucket.txt)
+install_dir=$PWD
+
+#set the base directory
+basedir=$install_dir/results/$1
+rm -rf $basedir
+mkdir -p $basedir
+
+mkdir -p $basedir
+echo "Running Monkey Pox version %s" $version > $basedir/run_mpx.log
 
 # Copy and unzip the fastq files from s3
-#aws s3 cp --recursive s3://804609861260-bioinformatics-infectious-disease/MPX/RAW_RUNS/$1 $basedir/reads/$1 --region us-gov-west-1
-aws s3 cp s3://804609861260-bioinformatics-infectious-disease/MPX/RAW_RUNS/$1.zip $basedir/reads/zip --region us-gov-west-1
-mkdir $basedir/reads/$1
-unzip -j $basedir/reads/zip/$1.zip -d $basedir/reads/$1
+mkdir -p $install_dir/reads/zip
+aws s3 cp s3://804609861260-bioinformatics-infectious-disease/MPX/RAW_RUNS/$1.zip $install_dir/reads/zip --region us-gov-west-1
+mkdir -p $install_dir/reads/$1
+unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
 # # Check if the file size is < 1Mb, if yes then move to a folder
 # mkdir $basedir/reads/$1/small_size_fastq
@@ -25,24 +35,26 @@ unzip -j $basedir/reads/zip/$1.zip -d $basedir/reads/$1
 # done
 
 # Run Cecret pipeline
-cd $basedir/results/$1
-/work/software/nextflow run UPHL-BioNGS/Cecret -c /home/dnalab/monkeypox/config/mpx.config --reads $basedir/reads/$1 --outdir $basedir/results/$1
-rm -r $basedir/results/$1/work
-rm -r $basedir/results/$1/shuffled
-rm -r $basedir/results/$1/seqyclean
-rm -r $basedir/results/$1/ivar_trim
-rm -r $basedir/results/$1/filter
-rm -r $basedir/results/$1/aligned
-rm $basedir/results/zip/$1.zip
+cd $basedir
+/work/software/nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+rm -r $basedir/work
+rm -r $basedir/shuffled
+rm -r $basedir/seqyclean
+rm -r $basedir/ivar_trim
+rm -r $basedir/filter
+rm -r $basedir/aligned
+
+mkdir -p $install_dir/results/zip/
+rm $install_dir/results/zip/$1.zip
 
 # # Zip and copy the results to s3
-rm -f $basedir/results/zip/$1_result.zip
-rm -f $basedir/results/zip/$1_report.zip
-zip -rj $basedir/results/zip/$1_report $basedir/results/$1/*.csv $basedir/results/$1/*.txt $basedir/results/$1/*.log
-aws s3 cp $basedir/results/zip/$1_report.zip s3://804609861260-bioinformatics-infectious-disease/MPX/REPORT/$1_report.zip --region us-gov-west-1
-zip -r $basedir/results/zip/$1_result $basedir/results/$1
-aws s3 cp $basedir/results/zip/$1_result.zip s3://804609861260-bioinformatics-infectious-disease/MPX/ANALYSIS_RESULTS/$1_result.zip --region us-gov-west-1
+rm -f $install_dir/results/zip/$1_result.zip
+rm -f $install_dir/results/zip/$1_report.zip
+zip -rj $install_dir/results/zip/$1_report $basedir/*.csv $basedir/*.txt $basedir/*.log
+aws s3 cp $install_dir/results/zip/$1_report.zip s3://804609861260-bioinformatics-infectious-disease/MPX/REPORT/$1_report.zip --region us-gov-west-1
+zip -r $install_dir/results/zip/$1_result $basedir
+aws s3 cp $install_dir/results/zip/$1_result.zip s3://804609861260-bioinformatics-infectious-disease/MPX/ANALYSIS_RESULTS/$1_result.zip --region us-gov-west-1
 
-rm $basedir/results/zip/$1_result.zip 
-rm $basedir/reads/zip/$1_result.zip 
-rm -r $basedir/reads/$1
+rm $install_dir/results/zip/$1_result.zip 
+rm $install_dir/reads/zip/$1_result.zip 
+rm -r $install_dir/reads/$1
