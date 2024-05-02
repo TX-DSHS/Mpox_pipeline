@@ -2,7 +2,7 @@
 # Author: Jie.Lu@dshs.texas.gov
 version="v1.1-05/02/2024"
 # set the base directory
-aws_bucket="s3://804609861260-covid-19"
+aws_bucket="s3://804609861260-bioinformatics-infectious-disease"
 
 # Read the aws bucket name from file aws_bucket.txt
 #aws_bucket=$(cat aws_bucket.txt)
@@ -14,11 +14,11 @@ rm -rf $basedir
 mkdir -p $basedir
 
 mkdir -p $basedir
-echo "Running Monkey Pox version %s" $version > $basedir/run_mpx.log
+echo "Running Monkey Pox version" $version > $basedir/run_mpx.log
 
 # Copy and unzip the fastq files from s3
 mkdir -p $install_dir/reads/zip
-aws s3 cp s3://804609861260-bioinformatics-infectious-disease/MPX/RAW_RUNS/$1.zip $install_dir/reads/zip --region us-gov-west-1
+aws s3 cp $aws_bucket/MPX/RAW_RUNS/$1.zip $install_dir/reads/zip --region us-gov-west-1
 mkdir -p $install_dir/reads/$1
 unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
@@ -37,6 +37,12 @@ unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 # Run Cecret pipeline
 cd $basedir
 /work/software/nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+# if the run is not successful, exit the script
+if [ $? -ne 0 ]; then
+    echo "The Mpox Cecret pipeline failed" 1>>$basedir/run_mpx.log
+    exit 1
+fi
+
 rm -r $basedir/work
 rm -r $basedir/shuffled
 rm -r $basedir/seqyclean
@@ -51,9 +57,19 @@ rm $install_dir/results/zip/$1.zip
 rm -f $install_dir/results/zip/$1_result.zip
 rm -f $install_dir/results/zip/$1_report.zip
 zip -rj $install_dir/results/zip/$1_report $basedir/*.csv $basedir/*.txt $basedir/*.log
-aws s3 cp $install_dir/results/zip/$1_report.zip s3://804609861260-bioinformatics-infectious-disease/MPX/REPORT/$1_report.zip --region us-gov-west-1
+aws s3 cp $install_dir/results/zip/$1_report.zip $aws_bucket/MPX/REPORT/$1_report.zip --region us-gov-west-1
+# if the transfer is not successful, exit the script
+if [ $? -ne 0 ]; then
+    echo "The report zip file $1.zip failed to transfer to the S3 bucket" 1>>$basedir/run_mpx.log
+    exit 1
+fi
+
 zip -r $install_dir/results/zip/$1_result $basedir
-aws s3 cp $install_dir/results/zip/$1_result.zip s3://804609861260-bioinformatics-infectious-disease/MPX/ANALYSIS_RESULTS/$1_result.zip --region us-gov-west-1
+aws s3 cp $install_dir/results/zip/$1_result.zip $aws_bucket/MPX/ANALYSIS_RESULTS/$1_result.zip --region us-gov-west-1
+if [ $? -ne 0 ]; then
+    echo "The result zip file $1.zip failed to transfer to the S3 bucket" 1>>$basedir/run_mpx.log
+    exit 1
+fi
 
 rm $install_dir/results/zip/$1_result.zip 
 rm $install_dir/reads/zip/$1_result.zip 
