@@ -36,13 +36,15 @@ unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
 # Run Cecret pipeline
 cd $basedir
-/work/software/nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+conda activate mpx
+nextflow pull UPHL-BioNGS/Cecret
+nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
 # if the run is not successful, exit the script
 if [ $? -ne 0 ]; then
     echo "The Mpox Cecret pipeline failed" 1>>$basedir/run_mpx.log
     exit 1
 fi
-
+conda deactivate
 rm -r $basedir/work
 rm -r $basedir/shuffled
 rm -r $basedir/seqyclean
