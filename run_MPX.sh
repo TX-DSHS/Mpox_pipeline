@@ -14,7 +14,7 @@ rm -rf $basedir
 mkdir -p $basedir
 
 mkdir -p $basedir
-echo "Running Monkey Pox version" $version > $basedir/run_mpx.log
+echo "Running Mpox pipeline version" $version > $basedir/run_mpx.log
 
 # Copy and unzip the fastq files from s3
 mkdir -p $install_dir/reads/zip
@@ -37,8 +37,11 @@ unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 # Run Cecret pipeline
 cd $basedir
 conda activate mpx
+export NXF_SINGULARITY_CACHEDIR=$install_dir/singularity_cache
 nextflow pull UPHL-BioNGS/Cecret
-nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+#nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+
+nextflow run UPHL-BioNGS/Cecret --reads $install_dir/reads/$1 --outdir $basedir -profile singularity,mpx_primalseq 
 # if the run is not successful, exit the script
 if [ $? -ne 0 ]; then
     echo "The Mpox Cecret pipeline failed" 1>>$basedir/run_mpx.log
@@ -74,5 +77,5 @@ if [ $? -ne 0 ]; then
 fi
 
 rm $install_dir/results/zip/$1_result.zip 
-rm $install_dir/reads/zip/$1_result.zip 
+rm $install_dir/reads/zip/$1.zip 
 rm -r $install_dir/reads/$1
