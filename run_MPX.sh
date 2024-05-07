@@ -51,7 +51,7 @@ conda deactivate
 rm -r $basedir/work
 rm -r $basedir/shuffled
 rm -r $basedir/seqyclean
-rm -r $basedir/ivar_trim
+#rm -r $basedir/ivar_trim
 rm -r $basedir/filter
 rm -r $basedir/aligned
 
