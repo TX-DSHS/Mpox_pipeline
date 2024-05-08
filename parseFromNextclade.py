@@ -9,22 +9,6 @@ import logging
 import pandas as pd
 from datetime import date
 
-my_parser = argparse.ArgumentParser()
-my_parser.add_argument("-i", help = 'Installation path', default = "/bioinformatics/Mpox_pipeline")
-my_parser.add_argument("-r", help = 'Run name')
-
-args = my_parser.parse_args()
-install_dir = args.i
-run_name = args.r
-
-logging.basicConfig(filename = 'parseFromNextclade.log', filemode = 'a', level = logging.DEBUG)
-logging.info('Parsing from Nextclade results {} starting on run {}'.format(version, run_name))
-logging.info(str(date.today()))
-
-result_dir = install_dir + "/results/" + run_name 
-json_path = result_dir + "/nextclade/nextclade.json"
-tsv_file_path = result_dir + "/OPG057_substitutions.txt"
-
 class nextclade(object):
     def __init__(self, json_path):
         with open(json_path, 'r') as file:
@@ -69,5 +53,21 @@ class nextclade(object):
          
 
 if __name__ == "__main__":
+    my_parser = argparse.ArgumentParser()
+    my_parser.add_argument("-i", help = 'Installation path', default = "/bioinformatics/Mpox_pipeline")
+    my_parser.add_argument("-r", help = 'Run name')
+
+    args = my_parser.parse_args()
+    install_dir = args.i
+    run_name = args.r
+
+    logging.basicConfig(filename = 'parseFromNextclade.log', filemode = 'a', level = logging.DEBUG)
+    logging.info('Parsing from Nextclade results {} starting on run {}'.format(version, run_name))
+    logging.info(str(date.today()))
+
+    result_dir = install_dir + "/results/" + run_name 
+    json_path = result_dir + "/nextclade/nextclade.json"
+    tsv_file_path = result_dir + "/OPG057_substitutions.txt"
+
     results = nextclade(json_path)
     results.get_gene(tsv_file_path)
