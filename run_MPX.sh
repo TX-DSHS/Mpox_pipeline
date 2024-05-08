@@ -1,6 +1,6 @@
 # Run Monkey Pox pipeline
 # Author: Jie.Lu@dshs.texas.gov
-version="v1.1-05/02/2024"
+version="v1.1-05/08/2024"
 # set the base directory
 aws_bucket="s3://804609861260-bioinformatics-infectious-disease"
 
@@ -22,17 +22,17 @@ aws s3 cp $aws_bucket/MPX/RAW_RUNS/$1.zip $install_dir/reads/zip --region us-gov
 mkdir -p $install_dir/reads/$1
 unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
-# # Check if the file size is < 1Mb, if yes then move to a folder
-# mkdir $basedir/reads/$1/small_size_fastq
-# echo "Checking the size of the file..." >> $basedir/results/$1/run_mpx.log
-# touch $basedir/results/$1/$1_failed_file_size.log
-# for fastq in $basedir/reads/$1/*.gz; do
-#   myfilesize=$(stat --format=%s $fastq)
-#   if [ $myfilesize -lt 1000000 ]; then
-#     mv $fastq $basedir/reads/$1/small_size_fastq
-#     echo $fastq  >> $basedir/results/$1/failed_file_size.log
-#   fi
-# done
+# Check if the file size is < 1Mb, if yes then move to a folder
+mkdir $basedir/reads/$1/small_size_fastq
+echo "Checking the size of the file..." >> $basedir/results/$1/run_mpx.log
+touch $basedir/results/$1/$1_failed_file_size.log
+for fastq in $basedir/reads/$1/*.gz; do
+  myfilesize=$(stat --format=%s $fastq)
+  if [ $myfilesize -lt 1000000 ]; then
+    mv $fastq $basedir/reads/$1/small_size_fastq
+    echo $fastq  >> $basedir/results/$1/failed_file_size.log
+  fi
+done
 
 # Run Cecret pipeline
 cd $basedir
@@ -45,9 +45,8 @@ nextflow run UPHL-BioNGS/Cecret --reads $install_dir/reads/$1 --outdir $basedir 
 # if the run is not successful, exit the script
 if [ $? -ne 0 ]; then
     echo "The Mpox Cecret pipeline failed" 1>>$basedir/run_mpx.log
-    exit 1
 fi
-conda deactivate
+
 rm -r $basedir/work
 rm -r $basedir/shuffled
 rm -r $basedir/seqyclean
@@ -57,6 +56,13 @@ rm -r $basedir/aligned
 
 mkdir -p $install_dir/results/zip/
 rm $install_dir/results/zip/$1.zip
+
+# Parse OPG057 gene aaSubstitution from Nextclade json
+python3 $install_dir/parseFromNextclade.py -r $1
+conda deactivate
+if [ $? -ne 0 ]; then
+    echo "Parsing from nextclade json failed" 1>>$basedir/run_mpx.log
+fi
 
 # # Zip and copy the results to s3
 rm -f $install_dir/results/zip/$1_result.zip
