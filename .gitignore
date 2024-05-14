@@ -1,1 +1,5 @@
-cacheDir/
+singularity_cache/
+.nextflow.*
+.nextflow/
+reads/
+results/
