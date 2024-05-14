@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
-# parse results from nextclade json file generated from mpox pipeline
-# Usage: python3 
+# parse results from nextclade json file generated from Mpox pipeline
+# Usage: python3 parseFromNextclade.py -r <run name>
 # Author: Jie.Lu@dshs.texas.gov
-version = "1.0-5/8/2024"
+version = "1.0-5/14/2024"
 import json
 import argparse
 import logging
@@ -10,6 +10,7 @@ import pandas as pd
 from datetime import date
 
 class nextclade(object):
+    '''Parse amino acid substitutions from Nextclade json file'''
     def __init__(self, json_path):
         with open(json_path, 'r') as file:
             json_data = json.load(file)
@@ -71,3 +72,5 @@ if __name__ == "__main__":
 
     results = nextclade(json_path)
     results.get_gene(tsv_file_path)
+    logging.info('Results have been saved to OPG057_substitutions.txt')
+    logging.info("Finished at " + str(date.today()))
