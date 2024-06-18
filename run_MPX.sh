@@ -41,7 +41,9 @@ export NXF_SINGULARITY_CACHEDIR=$install_dir/singularity_cache
 nextflow pull UPHL-BioNGS/Cecret
 #nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
 
-nextflow run UPHL-BioNGS/Cecret --reads $install_dir/reads/$1 --outdir $basedir -profile singularity,mpx_primalseq 
+nextflow run UPHL-BioNGS/Cecret --reads $install_dir/reads/$1 --outdir $basedir -profile singularity,mpx_primalseq \
+--ivar_variants_options '-q 20 -t 0.03' --ivar_consensus_options '-q 20 -t 0.03 -n N'
+
 # if the run is not successful, exit the script
 if [ $? -ne 0 ]; then
     echo "The Mpox Cecret pipeline failed" 1>>$basedir/run_mpx.log
