@@ -25,27 +25,42 @@ class nextclade(object):
         for result in self.results:
             sampleName.append(result['seqName'])
             if result["aaSubstitutions"]:
+                gene_in_result = 0
                 for s in result["aaSubstitutions"]:
                     #print(s["cdsName"])
                     if s["cdsName"] == gene:
                         #print(s["refAa"] + str(s["pos"]) + s["qryAa"])
                         aaSub.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                        gene_in_result = 1
+                if gene_in_result == 0:
+                    aaSub.append("Not_Detected")
             else:
                 aaSub.append("Not_Detected")
 
             if result["aaDeletions"]:
+                gene_in_result = 0
                 for s in result["aaDeletions"]:
                     if s["cdsName"] == gene:
                         aaDel.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                        gene_in_result = 1
+                if gene_in_result == 0:
+                    aaDel.append("Not_Detected")
             else:
                 aaDel.append("Not_Detected")
            
             if result["aaInsertions"]:
+                gene_in_result = 0
+                if len(result["aaInsertions"]) == 0:
+                    aaIns.append("Not_Detected")
                 for s in result["aaInsertions"]:
                     if s["cdsName"] == gene:
                         aaIns.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                        gene_in_result = 1
+                if gene_in_result == 0:
+                    aaIns.append("Not_Detected")
             else:
                 aaIns.append("Not_Detected")
+        print(aaSub)
         df["sample"] = sampleName
         df["aaSubstitutions"] = aaSub
         df["aaDeletions"] = aaDel
