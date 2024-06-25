@@ -26,7 +26,9 @@ unzip -j $basedir/reads/zip/$1.zip -d $basedir/reads/$1
 
 # Run Cecret pipeline
 cd $basedir/results/$1
-/work/software/nextflow run UPHL-BioNGS/Cecret -c /home/dnalab/monkeypox/config/mpx.config --reads $basedir/reads/$1 --outdir $basedir/results/$1
+nextflow run UPHL-BioNGS/Cecret -r 3.4.20221121 -c /home/dnalab/monkeypox/config/mpx.config --reads $basedir/reads/$1 --outdir $basedir/results/$1 #\
+#--ivar_variants_options '-q 20 -t 0.15' --ivar_consensus_options '-q 20 -t 0.15 -n N'
+
 rm -r $basedir/results/$1/work
 rm -r $basedir/results/$1/shuffled
 rm -r $basedir/results/$1/seqyclean
