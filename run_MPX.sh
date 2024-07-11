@@ -23,23 +23,24 @@ mkdir -p $install_dir/reads/$1
 unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
 # Check if the file size is < 1Mb, if yes then move to a folder
-mkdir $basedir/reads/$1/small_size_fastq
-echo "Checking the size of the file..." >> $basedir/results/$1/run_mpx.log
-touch $basedir/results/$1/$1_failed_file_size.log
-for fastq in $basedir/reads/$1/*.gz; do
-  myfilesize=$(stat --format=%s $fastq)
-  if [ $myfilesize -lt 1000000 ]; then
-    mv $fastq $basedir/reads/$1/small_size_fastq
-    echo $fastq  >> $basedir/results/$1/failed_file_size.log
-  fi
-done
+#mkdir $basedir/reads/$1/small_size_fastq
+#echo "Checking the size of the file..." >> $basedir/results/$1/run_mpx.log
+#touch $basedir/results/$1/$1_failed_file_size.log
+#for fastq in $basedir/reads/$1/*.gz; do
+#  myfilesize=$(stat --format=%s $fastq)
+#  if [ $myfilesize -lt 1000000 ]; then
+#    mv $fastq $basedir/reads/$1/small_size_fastq
+#    echo $fastq  >> $basedir/results/$1/failed_file_size.log
+#  fi
+#done
 
 # Run Cecret pipeline
 cd $basedir
+source /home/bioinform/miniconda/etc/profile.d/conda.sh
 conda activate mpx
 export NXF_SINGULARITY_CACHEDIR=$install_dir/singularity_cache
-nextflow pull UPHL-BioNGS/Cecret
-#nextflow run UPHL-BioNGS/Cecret -c $install_dir/config/mpx.config --reads $install_dir/reads/$1 --outdir $basedir
+
+#nextflow pull UPHL-BioNGS/Cecret
 
 nextflow run UPHL-BioNGS/Cecret --reads $install_dir/reads/$1 --outdir $basedir \
          -profile singularity,mpx_yale \
@@ -53,11 +54,9 @@ if [ $? -ne 0 ]; then
 fi
 
 rm -r $basedir/work
-rm -r $basedir/shuffled
 rm -r $basedir/seqyclean
 #rm -r $basedir/ivar_trim
-rm -r $basedir/filter
-#rm -r $basedir/aligned
+##rm -r $basedir/aligned
 
 mkdir -p $install_dir/results/zip/
 rm $install_dir/results/zip/$1.zip
@@ -89,4 +88,4 @@ fi
 
 rm $install_dir/results/zip/$1_result.zip 
 rm $install_dir/reads/zip/$1.zip 
-rm -r $install_dir/reads/$1
+#rm -r $install_dir/reads/$1
