@@ -2,7 +2,7 @@
 # parse results from nextclade json file generated from Mpox pipeline
 # Usage: python3 parseFromNextclade.py -r <run name>
 # Author: Jie.Lu@dshs.texas.gov
-version = "1.0-5/14/2024"
+version = "1.0-8/12/2024"
 import json
 import argparse
 import logging
@@ -14,7 +14,26 @@ class nextclade(object):
     def __init__(self, json_path):
         with open(json_path, 'r') as file:
             json_data = json.load(file)
-            self.results = json_data["results"]      
+            self.results = json_data["results"]
+    
+    @staticmethod      
+    def get_mutation(result, type, gene):
+        if result[type]:
+            gene_in_result = 0
+            mutations = []
+            for s in result[type]:          
+                if s["cdsName"] == gene:
+                    print(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                    mutations.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                    gene_in_result += 1
+            mutations = ";".join(mutations)
+            print(mutations)
+            
+            if gene_in_result == 0:
+                mutations = "Not_Detected"
+            return mutations
+        else:
+            return("Not_Detected")
 
     def get_gene(self, tsv_file_path, gene = "OPG057"):
         df = pd.DataFrame()
@@ -24,42 +43,15 @@ class nextclade(object):
         aaIns = []
         for result in self.results:
             sampleName.append(result['seqName'])
-            if result["aaSubstitutions"]:
-                gene_in_result = 0
-                for s in result["aaSubstitutions"]:
-                    #print(s["cdsName"])
-                    if s["cdsName"] == gene:
-                        #print(s["refAa"] + str(s["pos"]) + s["qryAa"])
-                        aaSub.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
-                        gene_in_result = 1
-                if gene_in_result == 0:
-                    aaSub.append("Not_Detected")
-            else:
-                aaSub.append("Not_Detected")
+            mutations = self.get_mutation(result, "aaSubstitutions", gene)
+            aaSub.append(mutations)
+            
+            mutations = self.get_mutation(result, "aaDeletions", gene)
+            aaDel.append(mutations)
+            
+            mutations = self.get_mutation(result, "aaInsertions", gene)
+            aaIns.append(mutations)
 
-            if result["aaDeletions"]:
-                gene_in_result = 0
-                for s in result["aaDeletions"]:
-                    if s["cdsName"] == gene:
-                        aaDel.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
-                        gene_in_result = 1
-                if gene_in_result == 0:
-                    aaDel.append("Not_Detected")
-            else:
-                aaDel.append("Not_Detected")
-           
-            if result["aaInsertions"]:
-                gene_in_result = 0
-                if len(result["aaInsertions"]) == 0:
-                    aaIns.append("Not_Detected")
-                for s in result["aaInsertions"]:
-                    if s["cdsName"] == gene:
-                        aaIns.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
-                        gene_in_result = 1
-                if gene_in_result == 0:
-                    aaIns.append("Not_Detected")
-            else:
-                aaIns.append("Not_Detected")
         print(aaSub)
         df["sample"] = sampleName
         df["aaSubstitutions"] = aaSub
