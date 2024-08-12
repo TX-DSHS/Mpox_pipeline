@@ -1,6 +1,6 @@
 # Run Monkey Pox pipeline
 # Author: Jie.Lu@dshs.texas.gov
-version="v1.1-05/08/2024"
+version="v2.0-07/11/2024"
 # set the base directory
 aws_bucket="s3://804609861260-bioinformatics-infectious-disease"
 
