@@ -24,7 +24,7 @@ class nextclade(object):
             for s in result[type]:          
                 if s["cdsName"] == gene:
                     print(s["refAa"] + str(s["pos"]) + s["qryAa"])
-                    mutations.append(s["refAa"] + str(s["pos"]) + s["qryAa"])
+                    mutations.append(s["refAa"] + str(s["pos"] + 1) + s["qryAa"])
                     gene_in_result += 1
             mutations = ";".join(mutations)
             print(mutations)
