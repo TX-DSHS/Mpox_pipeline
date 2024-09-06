@@ -1,6 +1,6 @@
 # Run Monkey Pox pipeline
 # Author: Jie.Lu@dshs.texas.gov
-version="v2.0-07/11/2024"
+version="v2.0-08/06/2024"
 # set the base directory
 aws_bucket="s3://804609861260-bioinformatics-infectious-disease"
 
@@ -36,8 +36,8 @@ unzip -j $install_dir/reads/zip/$1.zip -d $install_dir/reads/$1
 
 # Run Cecret pipeline
 cd $basedir
-source /home/bioinform/miniconda/etc/profile.d/conda.sh
-conda activate mpx
+source /home/dnalab/miniconda3/etc/profile.d/conda.sh
+conda activate mpox
 export NXF_SINGULARITY_CACHEDIR=$install_dir/singularity_cache
 
 #nextflow pull UPHL-BioNGS/Cecret
