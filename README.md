@@ -9,6 +9,7 @@ git clone https://github.com/TX-DSHS/Mpox_pipeline.git
 ## Create a conda environment:
 ```bash
 conda create --name mpox --file requirements.txt
+conda install -c conda-forge -c bioconda openjdk==11.0.20 singularity
 ```
 
 ## Contributing
