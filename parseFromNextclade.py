@@ -2,7 +2,7 @@
 # parse results from nextclade json file generated from Mpox pipeline
 # Usage: python3 parseFromNextclade.py -r <run name>
 # Author: Jie.Lu@dshs.texas.gov
-version = "1.0-8/12/2024"
+version = "1.1-12/27/2024"
 import json
 import argparse
 import logging
@@ -21,11 +21,14 @@ class nextclade(object):
         if result[type]:
             gene_in_result = 0
             mutations = []
-            for s in result[type]:          
+            for s in result[type]:
+              try:          
                 if s["cdsName"] == gene:
                     print(s["refAa"] + str(s["pos"]) + s["qryAa"])
                     mutations.append(s["refAa"] + str(s["pos"] + 1) + s["qryAa"])
                     gene_in_result += 1
+              except KeyError:
+                pass
             mutations = ";".join(mutations)
             print(mutations)
             
