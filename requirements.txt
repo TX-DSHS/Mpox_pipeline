@@ -61,10 +61,10 @@ libxcrypt=4.4.36=hd590300_1
 libzlib=1.2.13=hd590300_5
 ncurses=6.4.20240210=h59595ed_0
 nextflow=23.10.1=hdfd78af_0
-numpy=1.26.4=pypi_0
+numpy=1.26.4
 openjdk=17.0.11=h24d6bf4_0
 openssl=3.3.0=hd590300_0
-pandas=2.2.2=pypi_0
+pandas=2.2.2
 pcre2=10.43=hcad00b1_0
 pip=24.0=pyhd8ed1ab_0
 pixman=0.43.2=h59595ed_0
